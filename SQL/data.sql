@@ -60,3 +60,38 @@ INSERT INTO OrderItems (item_id, order_id, product_name, quantity, price) VALUES
 (1008, 106, 'Charger', 1, 50.00),
 (1009, 107, 'Tablet', 1, 500.00),
 (1010, 108, 'Smartwatch', 3, 150.00);
+
+
+
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    c.join_date,
+    COUNT(o.order_id) AS total_orders
+FROM 
+    Customers c
+LEFT JOIN 
+    Orders o ON c.customer_id = o.customer_id
+GROUP BY 
+    c.customer_id, c.customer_name, c.join_date
+ORDER BY 
+    total_orders DESC;
+
+
+
+SELECT 
+    c.customer_id,
+    c.customer_name,
+    c.country,
+    SUM(oi.quantity * oi.price) AS total_spending,
+    RANK() OVER (PARTITION BY c.country ORDER BY SUM(oi.quantity * oi.price) DESC) AS spending_rank
+FROM 
+    Customers c
+LEFT JOIN 
+    Orders o ON c.customer_id = o.customer_id
+LEFT JOIN 
+    OrderItems oi ON o.order_id = oi.order_id
+GROUP BY 
+    c.customer_id, c.customer_name, c.country
+ORDER BY 
+    c.country, spending_rank;
